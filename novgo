@@ -1,0 +1,14 @@
+file = open('data/Novgorods9.txt', encoding ="UTF-8")
+text = file.read().lower()
+file.close()
+def remove_punc(paskatpois):
+    punctuation = ',!@#$%^&*()_-+={}[]:;"\'|<>,?/~`' #ei pistettä
+    for marker in punctuation:
+        paskatpois = paskatpois.replace(marker, "")
+    return paskatpois
+text = remove_punc(text)
+text = text.split()
+
+f = open('data/novgoedited1.txt', 'wt', encoding='utf-8')
+f.write(str(text))
+f.close()
