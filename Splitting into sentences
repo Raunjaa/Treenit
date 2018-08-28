@@ -14,7 +14,7 @@ def split_into_sentences(text):
     sentences = [s.strip() for s in sentences]
     return sentences
     
-sentences = split_into_sentences(text)
+sentences = split_into_sentences(text)  #Tästä alas ei toimi
 
 def sentences_containing_the_search_word(item_to_count, list_to_search):
     sentences_hit = []
