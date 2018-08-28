@@ -1,0 +1,16 @@
+file = open('data/', encoding ="UTF-8")
+text = file.read()
+file.close()
+import re
+abbreviations = "(дв|Д)[.]" #or smth else
+def split_into_sentences(text):
+    text = " " + text + "  "
+    text = text.replace("\n"," ")
+    text = re.sub(abbreviations,"\\1<prd>",text)
+    text = text.replace(".",".<stop>")
+    text = text.replace("<prd>",".")
+    sentences = text.split("<stop>")
+    sentences = sentences[:-1]
+    sentences = [s.strip() for s in sentences]
+    return sentences
+print(split_into_sentences(text))
