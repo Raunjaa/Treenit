@@ -13,4 +13,15 @@ def split_into_sentences(text):
     sentences = sentences[:-1]
     sentences = [s.strip() for s in sentences]
     return sentences
-print(split_into_sentences(text))
+    
+sentences = split_into_sentences(text)
+
+def sentences_containing_the_search_word(item_to_count, list_to_search):
+    sentences_hit = []
+    for sentence in list_to_search:
+        for word in sentence:
+            if word.startswith(item_to_count):
+                sentences_hit.append(sentence)
+    return sentences_hit
+
+print(sentences_containing_the_search_word("Иго", sentences))
