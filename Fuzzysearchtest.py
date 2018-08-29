@@ -12,15 +12,30 @@ Created on Wed Aug 29 11:26:57 2018
 """
 
 
+import re
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 file = open('data/NovgoTest.txt', encoding ="UTF-8")
 text = file.read()
 file.close()
-print(fuzz.ratio("Иго","2Иго"))
+abbreviations = "(дв|Д)[.]"
+def split_into_sentences(text):
+    text = " " + text + "  "
+    text = text.replace("\n"," ")
+    text = re.sub(abbreviations,"\\1<prd>",text)
+    text = text.replace(".",".<stop>")
+    text = text.replace("<prd>",".")
+    sentences = text.split("<stop>")
+    sentences = sentences[:-1]
+    sentences = [s.strip() for s in sentences]
+    return sentences
+
+sentences = split_into_sentences(text)
+print(sentences)
+
 
 sentences_hit = []
-for sentence in text:
+for sentence in sentences:
         for word in sentence.split():
             if int(fuzz.ratio(word, "Иго")) > 80:
                 sentences_hit.append(sentence)
