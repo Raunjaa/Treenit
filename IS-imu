@@ -1,0 +1,75 @@
+import requests
+import json
+from bs4 import BeautifulSoup
+import re
+import time
+start = 0
+end = 100
+lkm = 0
+
+aineisto = []
+
+while start < 100:
+    u = "https://www.is.fi/api/search/Venäjä/kaikki/none/new/%d/%d/0/1637588070891" % (start, end) #
+    r = requests.get(u)
+    print("haetaan artikkeleita %d-%d" % (start, start + end))
+
+    try:
+        data = r.json()
+    except Exception as e:
+        print(e.msg)
+        start += 10
+        continue
+
+        
+
+    keywords = ["Venäjä"] #Venäjä
+
+    if data is not None:
+        for x in data:
+            if any(keyword in x["title"] for keyword in keywords):
+                temp = {}
+                if "id" in x:
+                    temp['id'] = x["id"]
+                if "title" in x:
+                    temp["title"] = x["title"]
+                if "ingress" in x:
+                    temp["ingress"] = x["ingress"]
+
+                temp["displayDate"] = x["displayDate"]
+                temp["category"] = x["category"]
+                temp["url"] = x["nodeRef"]["url"]
+                temp["comments"] = []
+
+                article_url = ("https://www.is.fi/rest/articles/%d/comments?perPage=1000000" % (x["id"]))
+                r = requests.get(article_url)
+                r_json = r.json()
+                if "list" in r_json:
+                    for comment in r_json["list"]:
+                        temp2 = {}
+                        temp2["text"] = comment["text"]
+                        temp2["userNickname"] = comment["userNickname"]
+                        temp["comments"].append(temp2)
+                aineisto.append(temp)
+                lkm += 1
+        start += 100
+        time.sleep(5)
+
+lkm_comments = 0
+for a in aineisto:
+    lkm_comments += len(a["comments"])
+
+print("kommentteja: %d" % lkm_comments)
+
+laskuri = 0
+with open("kanta_yleinen.tsv", "w", encoding = "utf-8") as f:
+    for x in aineisto:
+        article_url = ("https://www.is.fi%s/art-%d.html" % (x['url'], x['id']))
+        for comment in x['comments']:
+            clean_text = comment["text"].replace("\n", "")
+            f.write("%s\t%s\t\"%s\"\n" % (article_url, comment['userNickname'], clean_text))
+            laskuri += 1
+            print("%d: %s\t%s\t\"%s\"\n" % (laskuri, article_url, comment['userNickname'], clean_text))
+
+    f.close()
+print(lkm)
