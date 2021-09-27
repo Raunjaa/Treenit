@@ -1,0 +1,56 @@
+import pandas as pd
+from sklearn import linear_model
+from sklearn.linear_model import LinearRegression
+import numpy as np
+from sklearn.metrics import r2_score
+import matplotlib.pyplot as plt
+from datetime import date
+
+
+def coefficient():
+    data=pd.read_csv("comparision_data_literature_1910-29_top_100.tsv", sep="\t")
+    
+    valinta="kaikki"
+    
+    if valinta == "mies":
+        mies_data=data.loc[data["Sukupuoli"] == "Mies"]
+        mies_data=mies_data.loc[mies_data["Osuus_saneista %"] > 0]
+        x=mies_data["Suhdeluku %"].to_numpy()
+        y=mies_data["Osuus_saneista %"].to_numpy()
+        nimet=mies_data["Etunimi"].to_numpy()
+    
+    elif valinta=="nainen":
+        nais_data=data.loc[data["Sukupuoli"] == "Nainen"]
+        nais_data=nais_data.loc[nais_data["Osuus_saneista %"] > 0]
+        x=nais_data["Suhdeluku %"].to_numpy()
+        y=nais_data["Osuus_saneista %"].to_numpy()
+        nimet=nais_data["Etunimi"].to_numpy()
+
+    elif valinta =="kaikki":
+        yleis_data=data.loc[data["Osuus_saneista %"] > 0]
+        x=yleis_data["Suhdeluku %"].to_numpy()
+        y=yleis_data["Osuus_saneista %"].to_numpy()
+        nimet=yleis_data["Etunimi"].to_numpy()
+    
+    return x,y, nimet, valinta
+
+def main():
+    x,y, nimet, valinta = coefficient()
+    model=LinearRegression(fit_intercept=False)
+    model.fit(x[:,np.newaxis], y)
+    slope=model.coef_[0]
+    intercept= model.intercept_
+    yfit= slope*x
+    print(model.score(x.reshape(-1,1), y))
+    paiva=date.today()
+    plt.plot(x,yfit, color="black")
+    plt.ylabel("Nimet kirjoissa 1900-luvun alussa %")
+    plt.xlabel("Annetut nimet %")
+    plt.plot(x,y, 'o')
+    for i, label in enumerate(nimet):
+        plt.annotate(label, (x[i]+0.1, y[i]))
+    
+    plt.savefig(f"Plots/{valinta}nimet_literature_top_100_1910-29_linear_regression_{paiva}")
+    plt.show()
+
+main()
